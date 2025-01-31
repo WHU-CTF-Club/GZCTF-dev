@@ -8,6 +8,7 @@ using Docker.DotNet;
 using Docker.DotNet.Models;
 using GZCTF.Models.Internal;
 using GZCTF.Services.Container.Provider;
+using GZCTF.Services.Proxy;
 using ContainerStatus = GZCTF.Utils.ContainerStatus;
 
 namespace GZCTF.Services.Container.Manager;
@@ -16,12 +17,15 @@ public class SwarmManager : IContainerManager
 {
     readonly DockerClient _client;
     readonly ILogger<SwarmManager> _logger;
+    readonly ProxyRequest _proxyRequest;
     readonly DockerMetadata _meta;
 
-    public SwarmManager(IContainerProvider<DockerClient, DockerMetadata> provider, ILogger<SwarmManager> logger)
+    public SwarmManager(IContainerProvider<DockerClient, DockerMetadata> provider, ProxyRequest proxyRequest, 
+        ILogger<SwarmManager> logger)
     {
         _logger = logger;
         _meta = provider.GetMetadata();
+        _proxyRequest = proxyRequest;
         _client = provider.GetProvider();
 
         logger.SystemLog(Program.StaticLocalizer[nameof(Resources.Program.ContainerManager_SwarmMode)],
@@ -31,6 +35,8 @@ public class SwarmManager : IContainerManager
 
     public async Task DestroyContainerAsync(Models.Data.Container container, CancellationToken token = default)
     {
+        await _proxyRequest.DeleteProxyRequestAsync(container);
+        
         try
         {
             await _client.Swarm.RemoveServiceAsync(container.ContainerId, token);
@@ -165,6 +171,15 @@ public class SwarmManager : IContainerManager
         if (!string.IsNullOrEmpty(_meta.PublicEntry))
             container.PublicIP = _meta.PublicEntry;
 
+        bool proxyRes = await _proxyRequest.CreateProxyRequestAsync(container);
+        
+        if (!proxyRes)
+        {
+            _logger.LogError("Create Proxy channel failed");
+            await DestroyContainerAsync(container, token);
+            return null;
+        }
+        
         return container;
     }
 

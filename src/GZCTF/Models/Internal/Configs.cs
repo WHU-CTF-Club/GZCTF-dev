@@ -371,6 +371,17 @@ public class ConsoleConfig
 
 #endregion
 
+#region Proxy Config
+
+public class ProxyConfig
+{
+    public string? Url { get; set; } = string.Empty;
+    public string? LocalIP { get; set; } = string.Empty;
+    public string? Auth { get; set; } = string.Empty;
+}
+
+#endregion
+
 public class GrafanaLokiOptions
 {
     public bool Enable { get; set; }

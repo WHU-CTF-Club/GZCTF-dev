@@ -8,6 +8,7 @@ using Docker.DotNet;
 using Docker.DotNet.Models;
 using GZCTF.Models.Internal;
 using GZCTF.Services.Container.Provider;
+using GZCTF.Services.Proxy;
 using ContainerStatus = GZCTF.Utils.ContainerStatus;
 
 namespace GZCTF.Services.Container.Manager;
@@ -16,11 +17,13 @@ public class DockerManager : IContainerManager
 {
     readonly DockerClient _client;
     readonly ILogger<DockerManager> _logger;
+    readonly ProxyRequest _proxyRequest;
     readonly DockerMetadata _meta;
 
-    public DockerManager(IContainerProvider<DockerClient, DockerMetadata> provider, ILogger<DockerManager> logger)
+    public DockerManager(IContainerProvider<DockerClient, DockerMetadata> provider, ProxyRequest proxyRequest, ILogger<DockerManager> logger)
     {
         _logger = logger;
+        _proxyRequest = proxyRequest;
         _meta = provider.GetMetadata();
         _client = provider.GetProvider();
 
@@ -31,6 +34,8 @@ public class DockerManager : IContainerManager
 
     public async Task DestroyContainerAsync(Models.Data.Container container, CancellationToken token = default)
     {
+        await _proxyRequest.DeleteProxyRequestAsync(container);
+        
         try
         {
             await _client.Containers.RemoveContainerAsync(container.ContainerId,
@@ -240,7 +245,16 @@ public class DockerManager : IContainerManager
 
         if (!string.IsNullOrEmpty(_meta.PublicEntry))
             container.PublicIP = _meta.PublicEntry;
-
+        
+        bool proxyRes = await _proxyRequest.CreateProxyRequestAsync(container);
+        
+        if (!proxyRes)
+        {
+            _logger.LogError("Create Proxy channel failed");
+            await DestroyContainerAsync(container, token);
+            return null;
+        }
+        
         return container;
     }
 

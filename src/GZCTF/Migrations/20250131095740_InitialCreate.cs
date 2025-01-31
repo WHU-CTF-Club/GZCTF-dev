@@ -7,7 +7,7 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GZCTF.Migrations
 {
     /// <inheritdoc />
-    public partial class Initialize : Migration
+    public partial class InitialCreate : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
@@ -32,13 +32,13 @@ namespace GZCTF.Migrations
                 {
                     Id = table.Column<Guid>(type: "uuid", nullable: false),
                     Role = table.Column<int>(type: "integer", nullable: false),
-                    IP = table.Column<string>(type: "text", nullable: false),
+                    IP = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: false),
                     LastSignedInUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     LastVisitedUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     RegisterTimeUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Bio = table.Column<string>(type: "character varying(63)", maxLength: 63, nullable: false),
-                    RealName = table.Column<string>(type: "character varying(7)", maxLength: 7, nullable: false),
-                    StdNumber = table.Column<string>(type: "character varying(31)", maxLength: 31, nullable: false),
+                    Bio = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    RealName = table.Column<string>(type: "character varying(128)", maxLength: 128, nullable: false),
+                    StdNumber = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: false),
                     ExerciseVisible = table.Column<bool>(type: "boolean", nullable: false, defaultValue: true),
                     AvatarHash = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
                     UserName = table.Column<string>(type: "character varying(16)", maxLength: 16, nullable: true),
@@ -88,6 +88,8 @@ namespace GZCTF.Migrations
                     Port = table.Column<int>(type: "integer", nullable: false),
                     PublicIP = table.Column<string>(type: "text", nullable: true),
                     PublicPort = table.Column<int>(type: "integer", nullable: true),
+                    proxyServiceName = table.Column<string>(type: "text", nullable: true),
+                    proxyServicePort = table.Column<int>(type: "integer", nullable: true),
                     GameInstanceId = table.Column<int>(type: "integer", nullable: true),
                     ExerciseInstanceId = table.Column<int>(type: "integer", nullable: true)
                 },
@@ -142,8 +144,8 @@ namespace GZCTF.Migrations
                     Content = table.Column<string>(type: "text", nullable: false),
                     AcceptWithoutReview = table.Column<bool>(type: "boolean", nullable: false),
                     WriteupRequired = table.Column<bool>(type: "boolean", nullable: false),
-                    InviteCode = table.Column<string>(type: "text", nullable: true),
-                    Organizations = table.Column<string>(type: "text", nullable: true),
+                    InviteCode = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true),
+                    Divisions = table.Column<string>(type: "text", nullable: true),
                     TeamMemberCountLimit = table.Column<int>(type: "integer", nullable: false),
                     ContainerCountLimit = table.Column<int>(type: "integer", nullable: false),
                     StartTimeUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
@@ -165,12 +167,12 @@ namespace GZCTF.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     TimeUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    Level = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
+                    Level = table.Column<string>(type: "character varying(15)", maxLength: 15, nullable: false),
                     Logger = table.Column<string>(type: "character varying(250)", maxLength: 250, nullable: false),
+                    Status = table.Column<string>(type: "character varying(10)", maxLength: 10, nullable: true),
                     RemoteIP = table.Column<string>(type: "character varying(40)", maxLength: 40, nullable: true),
-                    UserName = table.Column<string>(type: "character varying(25)", maxLength: 25, nullable: true),
+                    UserName = table.Column<string>(type: "character varying(15)", maxLength: 15, nullable: true),
                     Message = table.Column<string>(type: "text", nullable: false),
-                    Status = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: true),
                     Exception = table.Column<string>(type: "text", nullable: true)
                 },
                 constraints: table =>
@@ -289,7 +291,7 @@ namespace GZCTF.Migrations
                 columns: table => new
                 {
                     Id = table.Column<string>(type: "character varying(8)", maxLength: 8, nullable: false),
-                    Title = table.Column<string>(type: "text", nullable: false),
+                    Title = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     Summary = table.Column<string>(type: "text", nullable: false),
                     Content = table.Column<string>(type: "text", nullable: false),
                     IsPinned = table.Column<bool>(type: "boolean", nullable: false),
@@ -314,8 +316,8 @@ namespace GZCTF.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Name = table.Column<string>(type: "character varying(16)", maxLength: 16, nullable: false),
-                    Bio = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: true),
+                    Name = table.Column<string>(type: "character varying(20)", maxLength: 20, nullable: false),
+                    Bio = table.Column<string>(type: "character varying(72)", maxLength: 72, nullable: true),
                     AvatarHash = table.Column<string>(type: "character varying(64)", maxLength: 64, nullable: true),
                     Locked = table.Column<bool>(type: "boolean", nullable: false),
                     InviteToken = table.Column<string>(type: "character varying(32)", maxLength: 32, nullable: false),
@@ -359,10 +361,10 @@ namespace GZCTF.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Type = table.Column<byte>(type: "smallint", nullable: false),
-                    Content = table.Column<string>(type: "text", nullable: false),
                     PublishTimeUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
-                    GameId = table.Column<int>(type: "integer", nullable: false)
+                    GameId = table.Column<int>(type: "integer", nullable: false),
+                    Type = table.Column<byte>(type: "smallint", nullable: false),
+                    Values = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -381,12 +383,12 @@ namespace GZCTF.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Type = table.Column<byte>(type: "smallint", nullable: false),
-                    Content = table.Column<string>(type: "text", nullable: false),
                     PublishTimeUtc = table.Column<DateTimeOffset>(type: "timestamp with time zone", nullable: false),
                     UserId = table.Column<Guid>(type: "uuid", nullable: true),
                     TeamId = table.Column<int>(type: "integer", nullable: false),
-                    GameId = table.Column<int>(type: "integer", nullable: false)
+                    GameId = table.Column<int>(type: "integer", nullable: false),
+                    Type = table.Column<byte>(type: "smallint", nullable: false),
+                    Values = table.Column<string>(type: "text", nullable: false)
                 },
                 constraints: table =>
                 {
@@ -418,7 +420,7 @@ namespace GZCTF.Migrations
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Status = table.Column<int>(type: "integer", nullable: false),
                     Token = table.Column<string>(type: "text", nullable: false),
-                    Organization = table.Column<string>(type: "text", nullable: true),
+                    Division = table.Column<string>(type: "text", nullable: true),
                     WriteupId = table.Column<int>(type: "integer", nullable: true),
                     GameId = table.Column<int>(type: "integer", nullable: false),
                     TeamId = table.Column<int>(type: "integer", nullable: false)
@@ -480,7 +482,7 @@ namespace GZCTF.Migrations
                     Tags = table.Column<string>(type: "text", nullable: true),
                     Title = table.Column<string>(type: "text", nullable: false),
                     Content = table.Column<string>(type: "text", nullable: false),
-                    Tag = table.Column<byte>(type: "smallint", nullable: false),
+                    Category = table.Column<byte>(type: "smallint", nullable: false),
                     Type = table.Column<byte>(type: "smallint", nullable: false),
                     Hints = table.Column<string>(type: "text", nullable: true),
                     IsEnabled = table.Column<bool>(type: "boolean", nullable: false),
@@ -493,7 +495,7 @@ namespace GZCTF.Migrations
                     ContainerExposePort = table.Column<int>(type: "integer", nullable: true),
                     FileName = table.Column<string>(type: "text", nullable: true),
                     ConcurrencyStamp = table.Column<Guid>(type: "uuid", nullable: false),
-                    FlagTemplate = table.Column<string>(type: "text", nullable: true),
+                    FlagTemplate = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: true),
                     AttachmentId = table.Column<int>(type: "integer", nullable: true),
                     TestContainerId = table.Column<Guid>(type: "uuid", nullable: true)
                 },
@@ -521,13 +523,14 @@ namespace GZCTF.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     EnableTrafficCapture = table.Column<bool>(type: "boolean", nullable: false),
+                    DisableBloodBonus = table.Column<bool>(type: "boolean", nullable: false),
                     OriginalScore = table.Column<int>(type: "integer", nullable: false),
                     MinScoreRate = table.Column<double>(type: "double precision", nullable: false),
                     Difficulty = table.Column<double>(type: "double precision", nullable: false),
                     GameId = table.Column<int>(type: "integer", nullable: false),
                     Title = table.Column<string>(type: "text", nullable: false),
                     Content = table.Column<string>(type: "text", nullable: false),
-                    Tag = table.Column<byte>(type: "smallint", nullable: false),
+                    Category = table.Column<byte>(type: "smallint", nullable: false),
                     Type = table.Column<byte>(type: "smallint", nullable: false),
                     Hints = table.Column<string>(type: "text", nullable: true),
                     IsEnabled = table.Column<bool>(type: "boolean", nullable: false),
@@ -540,7 +543,7 @@ namespace GZCTF.Migrations
                     ContainerExposePort = table.Column<int>(type: "integer", nullable: true),
                     FileName = table.Column<string>(type: "text", nullable: true),
                     ConcurrencyStamp = table.Column<Guid>(type: "uuid", nullable: false),
-                    FlagTemplate = table.Column<string>(type: "text", nullable: true),
+                    FlagTemplate = table.Column<string>(type: "character varying(120)", maxLength: 120, nullable: true),
                     AttachmentId = table.Column<int>(type: "integer", nullable: true),
                     TestContainerId = table.Column<Guid>(type: "uuid", nullable: true)
                 },
@@ -635,7 +638,7 @@ namespace GZCTF.Migrations
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
-                    Flag = table.Column<string>(type: "text", nullable: false),
+                    Flag = table.Column<string>(type: "character varying(127)", maxLength: 127, nullable: false),
                     IsOccupied = table.Column<bool>(type: "boolean", nullable: false),
                     AttachmentId = table.Column<int>(type: "integer", nullable: true),
                     ChallengeId = table.Column<int>(type: "integer", nullable: true),

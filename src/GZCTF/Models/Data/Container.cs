@@ -74,6 +74,9 @@ public class Container
     /// </summary>
     public int? PublicPort { get; set; }
 
+    public string? proxyServiceName { get; set; }
+    public int? proxyServicePort { get; set; }
+    
     /// <summary>
     /// Container instance access method
     /// </summary>

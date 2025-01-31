@@ -6,6 +6,7 @@
 using System.Net;
 using GZCTF.Models.Internal;
 using GZCTF.Services.Container.Provider;
+using GZCTF.Services.Proxy;
 using k8s;
 using k8s.Autorest;
 using k8s.Models;
@@ -16,13 +17,15 @@ public class KubernetesManager : IContainerManager
 {
     readonly Kubernetes _client;
     readonly ILogger<KubernetesManager> _logger;
+    readonly ProxyRequest _proxyRequest;
     readonly KubernetesMetadata _meta;
 
-    public KubernetesManager(IContainerProvider<Kubernetes, KubernetesMetadata> provider,
+    public KubernetesManager(IContainerProvider<Kubernetes, KubernetesMetadata> provider, ProxyRequest proxyRequest,
         ILogger<KubernetesManager> logger)
     {
         _logger = logger;
         _meta = provider.GetMetadata();
+        _proxyRequest = proxyRequest;
         _client = provider.GetProvider();
 
         logger.SystemLog(Program.StaticLocalizer[nameof(Resources.Program.ContainerManager_K8sMode)],
@@ -209,11 +212,22 @@ public class KubernetesManager : IContainerManager
         container.PublicIP = _meta.PublicEntry;
         container.PublicPort = service.Spec.Ports[0].NodePort;
 
+        bool proxyRes = await _proxyRequest.CreateProxyRequestAsync(container);
+        
+        if (!proxyRes)
+        {
+            _logger.LogError("Create Proxy channel failed");
+            await DestroyContainerAsync(container, token);
+            return null;
+        }
+        
         return container;
     }
 
     public async Task DestroyContainerAsync(Models.Data.Container container, CancellationToken token = default)
     {
+        await _proxyRequest.DeleteProxyRequestAsync(container);
+        
         try
         {
             await _client.CoreV1.DeleteNamespacedServiceAsync(container.ContainerId, _meta.Config.Namespace,

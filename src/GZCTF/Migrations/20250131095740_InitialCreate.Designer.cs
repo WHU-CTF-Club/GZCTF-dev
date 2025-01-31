@@ -12,15 +12,15 @@ using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 namespace GZCTF.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20240202021414_Initialize")]
-    partial class Initialize
+    [Migration("20250131095740_InitialCreate")]
+    partial class InitialCreate
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
-                .HasAnnotation("ProductVersion", "8.0.1")
+                .HasAnnotation("ProductVersion", "9.0.1")
                 .HasAnnotation("Relational:MaxIdentifierLength", 63);
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
@@ -135,6 +135,12 @@ namespace GZCTF.Migrations
                     b.Property<byte>("Status")
                         .HasColumnType("smallint");
 
+                    b.Property<string>("proxyServiceName")
+                        .HasColumnType("text");
+
+                    b.Property<int?>("proxyServicePort")
+                        .HasColumnType("integer");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ExerciseInstanceId")
@@ -163,6 +169,9 @@ namespace GZCTF.Migrations
                     b.Property<int?>("CPUCount")
                         .HasColumnType("integer");
 
+                    b.Property<byte>("Category")
+                        .HasColumnType("smallint");
+
                     b.Property<Guid>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("uuid");
@@ -187,7 +196,8 @@ namespace GZCTF.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("FlagTemplate")
-                        .HasColumnType("text");
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
 
                     b.Property<string>("Hints")
                         .HasColumnType("text");
@@ -203,9 +213,6 @@ namespace GZCTF.Migrations
 
                     b.Property<int>("SubmissionCount")
                         .HasColumnType("integer");
-
-                    b.Property<byte>("Tag")
-                        .HasColumnType("smallint");
 
                     b.Property<string>("Tags")
                         .HasColumnType("text");
@@ -305,7 +312,8 @@ namespace GZCTF.Migrations
 
                     b.Property<string>("Flag")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(127)
+                        .HasColumnType("character varying(127)");
 
                     b.Property<bool>("IsOccupied")
                         .HasColumnType("boolean");
@@ -343,6 +351,9 @@ namespace GZCTF.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
+                    b.Property<string>("Divisions")
+                        .HasColumnType("text");
+
                     b.Property<DateTimeOffset>("EndTimeUtc")
                         .HasColumnType("timestamp with time zone")
                         .HasAnnotation("Relational:JsonPropertyName", "end");
@@ -351,10 +362,8 @@ namespace GZCTF.Migrations
                         .HasColumnType("boolean");
 
                     b.Property<string>("InviteCode")
-                        .HasColumnType("text");
-
-                    b.Property<string>("Organizations")
-                        .HasColumnType("text");
+                        .HasMaxLength(32)
+                        .HasColumnType("character varying(32)");
 
                     b.Property<string>("PosterHash")
                         .HasMaxLength(64)
@@ -420,6 +429,9 @@ namespace GZCTF.Migrations
                     b.Property<int?>("CPUCount")
                         .HasColumnType("integer");
 
+                    b.Property<byte>("Category")
+                        .HasColumnType("smallint");
+
                     b.Property<Guid>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("uuid");
@@ -437,6 +449,9 @@ namespace GZCTF.Migrations
                     b.Property<double>("Difficulty")
                         .HasColumnType("double precision");
 
+                    b.Property<bool>("DisableBloodBonus")
+                        .HasColumnType("boolean");
+
                     b.Property<bool>("EnableTrafficCapture")
                         .HasColumnType("boolean");
 
@@ -444,7 +459,8 @@ namespace GZCTF.Migrations
                         .HasColumnType("text");
 
                     b.Property<string>("FlagTemplate")
-                        .HasColumnType("text");
+                        .HasMaxLength(120)
+                        .HasColumnType("character varying(120)");
 
                     b.Property<int>("GameId")
                         .HasColumnType("integer");
@@ -469,9 +485,6 @@ namespace GZCTF.Migrations
 
                     b.Property<int>("SubmissionCount")
                         .HasColumnType("integer");
-
-                    b.Property<byte>("Tag")
-                        .HasColumnType("smallint");
 
                     b.Property<Guid?>("TestContainerId")
                         .HasColumnType("uuid");
@@ -502,10 +515,6 @@ namespace GZCTF.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<int>("GameId")
                         .HasColumnType("integer");
 
@@ -521,6 +530,10 @@ namespace GZCTF.Migrations
 
                     b.Property<Guid?>("UserId")
                         .HasColumnType("uuid");
+
+                    b.Property<string>("Values")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -576,10 +589,6 @@ namespace GZCTF.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Content")
-                        .IsRequired()
-                        .HasColumnType("text");
-
                     b.Property<int>("GameId")
                         .HasColumnType("integer");
 
@@ -589,6 +598,10 @@ namespace GZCTF.Migrations
 
                     b.Property<byte>("Type")
                         .HasColumnType("smallint");
+
+                    b.Property<string>("Values")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
@@ -643,8 +656,8 @@ namespace GZCTF.Migrations
 
                     b.Property<string>("Level")
                         .IsRequired()
-                        .HasMaxLength(50)
-                        .HasColumnType("character varying(50)");
+                        .HasMaxLength(15)
+                        .HasColumnType("character varying(15)");
 
                     b.Property<string>("Logger")
                         .IsRequired()
@@ -660,15 +673,15 @@ namespace GZCTF.Migrations
                         .HasColumnType("character varying(40)");
 
                     b.Property<string>("Status")
-                        .HasMaxLength(20)
-                        .HasColumnType("character varying(20)");
+                        .HasMaxLength(10)
+                        .HasColumnType("character varying(10)");
 
                     b.Property<DateTimeOffset>("TimeUtc")
                         .HasColumnType("timestamp with time zone");
 
                     b.Property<string>("UserName")
-                        .HasMaxLength(25)
-                        .HasColumnType("character varying(25)");
+                        .HasMaxLength(15)
+                        .HasColumnType("character varying(15)");
 
                     b.HasKey("Id");
 
@@ -683,11 +696,11 @@ namespace GZCTF.Migrations
 
                     NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("Division")
+                        .HasColumnType("text");
+
                     b.Property<int>("GameId")
                         .HasColumnType("integer");
-
-                    b.Property<string>("Organization")
-                        .HasColumnType("text");
 
                     b.Property<int>("Status")
                         .HasColumnType("integer");
@@ -740,7 +753,8 @@ namespace GZCTF.Migrations
 
                     b.Property<string>("Title")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(50)
+                        .HasColumnType("character varying(50)");
 
                     b.Property<DateTimeOffset>("UpdateTimeUtc")
                         .HasColumnType("timestamp with time zone");
@@ -816,8 +830,8 @@ namespace GZCTF.Migrations
                         .HasColumnType("character varying(64)");
 
                     b.Property<string>("Bio")
-                        .HasMaxLength(32)
-                        .HasColumnType("character varying(32)");
+                        .HasMaxLength(72)
+                        .HasColumnType("character varying(72)");
 
                     b.Property<Guid>("CaptainId")
                         .HasColumnType("uuid");
@@ -832,8 +846,8 @@ namespace GZCTF.Migrations
 
                     b.Property<string>("Name")
                         .IsRequired()
-                        .HasMaxLength(16)
-                        .HasColumnType("character varying(16)");
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
 
                     b.HasKey("Id");
 
@@ -857,8 +871,8 @@ namespace GZCTF.Migrations
 
                     b.Property<string>("Bio")
                         .IsRequired()
-                        .HasMaxLength(63)
-                        .HasColumnType("character varying(63)");
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
 
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
@@ -878,7 +892,8 @@ namespace GZCTF.Migrations
 
                     b.Property<string>("IP")
                         .IsRequired()
-                        .HasColumnType("text");
+                        .HasMaxLength(40)
+                        .HasColumnType("character varying(40)");
 
                     b.Property<DateTimeOffset>("LastSignedInUtc")
                         .HasColumnType("timestamp with time zone");
@@ -911,8 +926,8 @@ namespace GZCTF.Migrations
 
                     b.Property<string>("RealName")
                         .IsRequired()
-                        .HasMaxLength(7)
-                        .HasColumnType("character varying(7)");
+                        .HasMaxLength(128)
+                        .HasColumnType("character varying(128)");
 
                     b.Property<DateTimeOffset>("RegisterTimeUtc")
                         .HasColumnType("timestamp with time zone");
@@ -925,8 +940,8 @@ namespace GZCTF.Migrations
 
                     b.Property<string>("StdNumber")
                         .IsRequired()
-                        .HasMaxLength(31)
-                        .HasColumnType("character varying(31)");
+                        .HasMaxLength(64)
+                        .HasColumnType("character varying(64)");
 
                     b.Property<bool>("TwoFactorEnabled")
                         .HasColumnType("boolean");

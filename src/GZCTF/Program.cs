@@ -36,6 +36,7 @@ using GZCTF.Services.Container;
 using GZCTF.Services.CronJob;
 using GZCTF.Services.HealthCheck;
 using GZCTF.Services.Mail;
+using GZCTF.Services.Proxy;
 using Microsoft.AspNetCore.DataProtection;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Identity;
@@ -238,6 +239,8 @@ builder.Services.AddTelemetry(telemetryOptions);
 
 builder.Services.AddSingleton<IMailSender, MailSender>()
     .Configure<EmailConfig>(builder.Configuration.GetSection(nameof(EmailConfig)));
+builder.Services.AddSingleton<ProxyRequest>()
+    .Configure<ProxyConfig>(builder.Configuration.GetSection(nameof(ProxyConfig)));
 
 builder.Services.Configure<RegistryConfig>(builder.Configuration.GetSection(nameof(RegistryConfig)));
 builder.Services.Configure<AccountPolicy>(builder.Configuration.GetSection(nameof(AccountPolicy)));
